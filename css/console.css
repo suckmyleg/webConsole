@@ -1,0 +1,91 @@
+body{
+	margin: 0px;
+	padding: 0px;
+}
+
+#console{
+    width: 100%;
+    height: 100%;
+    background: black;
+}
+
+#input{
+	height: 0px;
+}
+
+#output{
+	height: 97vh;
+	margin:0px;
+    overflow-y: auto;
+    padding: 5px;
+}
+
+#outputList{
+	list-style: none;
+	margin:0px;
+	padding: 0px;
+}
+
+#inputInput{
+	width: 100%;
+	border: 0px;
+	height: 0vh;
+	font-size: 30px;
+	padding: 0px;
+	border: 0px solid none;
+	border-radius: 0px;
+	color: black;
+	background-color: black;
+}
+
+
+
+
+
+.contentContainer{
+	display: inline;
+}
+
+.focusedCommandLine > .content{
+	border: 1px solid white;
+	color: white;
+}
+
+#outputList li{
+	font-size: 25px;
+}
+
+#outputList li label{
+	color: white;
+	margin-right: 10px;
+}
+
+#outputList li:hover > label{
+	color: black;
+}
+
+#outputList li:hover{
+	cursor: pointer;
+}
+
+
+
+.whiteBlack{
+	color: white;
+	background-color: black;
+}
+
+.blackWhite{
+	color: black;
+	background-color: white;
+}
+
+.greenWhite{
+	color: green;
+	background-color: white;
+}
+
+.greenBlack{
+	color: green;
+	background-color: black;
+}
