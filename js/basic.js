@@ -5,13 +5,34 @@ var COMMANDS = {
 	"web": displayWeb,
 	"reset":reset,
 	"info":info,
-	"play":play
+	"play":play,
+	"menu":menu,
+	"cls":cls,
+	"new":displayConsole
+}
+
+function cls(){
+	INDEX = 0;
+	$("#output").html("<ul id='outputList'></ul>");
+}
+
+function menu(name){
+	try{
+		setMenu(name);
+	}catch{
+		log("Menu "+name+" doesnt exists");
+	}
+}
+
+function displayConsole(command=""){
+	displayWeb("index.html?toSend="+command);
 }
 
 function displayWeb(href){
 	if(href != "")
 	{
-		addLine("<iframe style='background-color:white;' height='800' width='100%' src='"+href+"'></iframe>");
+		//addLine("<iframe style='background-color:white;' height='800' width='100%' src='"+href+"'></iframe>");
+		addLine("<iframe style='background-color:white;' height='auto' width='100%' src='"+href+"' frameBorder='0'></iframe>");
 	}else{
 		log("Incorrect url");
 	}
@@ -26,17 +47,16 @@ function play(href){
 }
 
 function playVideo(href){
-	if(href != "")
+	if(href.includes(".mp4"))
 	{
 		addLine("<video controls src='"+href+"'>");
 	}else{
 		log("Incorrect url");
 	}
-
 }
 
 function playMusic(href){
-	if(href != "")
+	if(href.includes(".mp3"))
 	{
 		addLine("<audio controls><source src='"+href+"' type='audio/mpeg'></audio>");
 	}else{
@@ -68,20 +88,36 @@ function showTriggers(){
 	}
 }
 
+function showActualMenu(){
+	log("Menu: "+MENU);
+}
+
+function showActualMenuCommands(){
+	log("Commands: "+Object.keys(COMMANDS));
+}
+
+function showMenus(){
+	log("MENUS:")
+	for(var menuName of Object.keys(MENUS)){
+		log("$tab$+"+menuName + ": ");
+		log("$tab$$tab$-Commands: "+Object.keys(MENUS[menuName].commands)+"\n");
+	}
+}
+
 function info(){
 	version();
+	log("Time: $time$");
+	showActualMenu();
+	showActualMenuCommands();
 	showTriggers();
+	showMenus();
 }
 
 function executeCommandLine(content){
 	var datas = content.split(" ");
-
 	var command = datas[0];
-
 	var content = content.replace(command+" ", "");
-
 	content = content == command?"":content;
-
 	var fun = COMMANDS[command];
 
 	if(fun != null)
@@ -90,14 +126,29 @@ function executeCommandLine(content){
 		fun(content)
 	}
 	else{
-		log("Uknown command")
+		trigger("inputWrongCommand", {"command":command,"content":content});
+		//log("Uknown command")
 	}
 }
 
 function executeCommandLineFromConsole(data){
-	reLog(data.content, false, "whiteBlack", false);
 	executeCommandLine(data.content);
 	return data;
 }
 
 addTrigger("userInputConsole", executeCommandLineFromConsole);
+
+addMenu("MAIN", execute,  "> ",{
+	"execute":executeCommandLine,
+	"help":help,
+	"time":time,
+	"web": displayWeb,
+	"reset":reset,
+	"info":info,
+	"play":play,
+	"menu":menu,
+	"cls":cls,
+	"new":displayConsole,
+	"showNumbers":function(data){hideNumbers = false;},
+	"hideNumbers":function(data){hideNumbers = true;}
+});

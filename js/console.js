@@ -5,6 +5,9 @@ var TRIGGERS = {};
 var INPUTINDEXMESSAGE = 0;
 var LASTLOGDATA = {};
 
+var MENU = "";
+var MENUS = {}
+
 function trigger(name, args={}){
 	console.log("Start", name, args);
 
@@ -13,8 +16,10 @@ function trigger(name, args={}){
 	if(funs != null)
 	{
 		var newArgs = null;
-		for(var fun of funs){
-			newArgs = fun(args);
+		for(var funInfo of funs){
+			if(funInfo[1].length == 0 || funInfo[1].includes(MENU)){
+				newArgs = funInfo[0](args);
+			}
 		}
 		if(newArgs != null) args = newArgs;
 	}
@@ -22,13 +27,51 @@ function trigger(name, args={}){
 	return args;
 }
 
-
-function addTrigger(name, fun){
+function addTrigger(name, fun, menus=[]){
 	try{
-		TRIGGERS[name].push(fun);
+		TRIGGERS[name].push([fun, menus]);
 	}catch{
-		TRIGGERS[name] = [fun];
+		TRIGGERS[name] = [[fun, menus]];
 	}
+}
+
+function addMenu(name, inputFun, inputText, commands={}, before="MAIN"){
+	commands["return"] = exitMenu;
+	MENUS[name] = {
+		"input":inputFun,
+		"inputText":inputText,
+		"before":before,
+		"commands":commands
+	}
+}
+
+function exitMenu(){
+	setMenu(MENUS[MENU].before);
+}
+
+function continueMenu(){
+	var menuData = MENUS[MENU];
+	COMMANDS = menuData.commands;
+	input(menuData.input, menuData.inputText);
+}
+
+function setMenu(menuName){
+	if (MENUS[menuName] != null) MENU = menuName;
+}
+
+function changeMenu(menuName){
+	var menuData = MENUS[menuName];
+	WAITTINGINPUT = [menuData.input];
+	MENU = menuName;
+	COMMANDS = menuData.commands;
+}
+
+function goMenu(menuName){
+	var menuData = MENUS[menuName];
+	WAITTINGINPUT = [];
+	input(menuData.input, menuData.inputText);
+	MENU = menuName;
+	COMMANDS = menuData.commands;
 }
 
 
@@ -43,6 +86,22 @@ function reset(){
 }
 
 
+function sendInput(text){
+	var fun = WAITTINGINPUT.shift()
+	
+	if(fun != null)
+	{
+		trigger("userInputConsole", {"content":text, "contentDisplay":text});
+		fun(text);
+	}
+	$("#output").animate({
+	scrollTop: $(
+	'#output').get(0).scrollHeight
+	}, 1);
+
+	continueMenu();
+}
+
 function setup(){
 	$("#console").html("<div id='output'></div><div id='input'></div>");
 	$("#output").html("<ul id='outputList'></ul>");
@@ -53,27 +112,16 @@ function setup(){
 		var self = this;
 
 		setTimeout(function(){
-			reLog($(self).val()+"_", INPUTINDEXMESSAGE, "focusedCommandLine", false);
+			reLog($(self).val()+" ", INPUTINDEXMESSAGE, "blackWhite", false);
 		}, 1);
 	});
 
 	$("#inputInput").keypress(function(e) {
-		var keycode = (e.keyCode?e.keyCode : e.which);
+		var keycode = (e.keyCode?e.keyCode:e.which);
 		if(keycode  == 13)
 		{
-			var fun = WAITTINGINPUT.shift()
-			
-			if(fun != null)
-			{
-				fun($(this).val());
-			}
-
+			sendInput($(this).val());
 			$(this).val("");
-
-			$("#output").animate({
-			scrollTop: $(
-			'#output').get(0).scrollHeight
-			}, 1);
 		}
 	});
 
@@ -83,11 +131,6 @@ function setup(){
 	$(document).on("click", function(){
 		$("input:text:visible:first").focus();
 	});
-
-
-
-	input(execute, "> ");
-
 }
 
 
@@ -98,14 +141,7 @@ function setup(){
 
 
 
-function execute(text){
-	var data = trigger("userInputConsole", {"content":text});
-	input(execute, "> ");
-}
-
-
-
-
+function execute(text){}
 
 
 
@@ -118,8 +154,8 @@ function execute(text){
 
 function input(fun, text=false){
 	if(text) {
-		var data = trigger("preUserInput", {"content":"", "display":"whiteBlack", "preContent":text})
-		INPUTINDEXMESSAGE = log(data.content, data.display, data.preContent);
+		var data = trigger("preUserInput", {"content":"", "contentDisplay":"", "display":"whiteBlack", "preContent":text})
+		INPUTINDEXMESSAGE = log(data.contentDisplay, data.display, data.preContent);
 	}
 	WAITTINGINPUT.push(fun);
 }
@@ -146,14 +182,18 @@ function log(text, display="whiteBlack", preContent=""){
 
 
 function setupCommandLineHtml(index, indexTxt, preContent, content, classes){
-	return "<label class='index'>"+indexTxt+"</label><div class='contentContainer "+classes+"'><label class='preContent'>"+preContent+"</label><LIT class='content'>"+content+"</LIT></div>";
+	return "<label class='index'>"+indexTxt+"</label><div class='contentContainer "+classes+"'><label class='preContent'>"+preContent+"</label><LIT class='content multiline'>"+content+"</LIT></div>";
 }
 
 function setupLineMessage(index, content, display, preContent){
-	var data = trigger("commandLineSetup", {"preContent":preContent, "content":content, "index":index, "indexTxt":""+index, "display":display});
+	var data = trigger("commandLineSetup", {"preContent":preContent, "content":content, "contentDisplay":content, "index":index, "indexTxt":""+index, "display":display});
 	LASTLOGDATA = data;
-	return setupCommandLineHtml(data.index, data.indexTxt, data.preContent, data.content, data.display);
+	return setupCommandLineHtml(data.index, data.indexTxt, data.preContent, data.contentDisplay, data.display);
 }
+
+
+
+
 
 
 
@@ -172,6 +212,8 @@ function addLineMessage(content="", index=INDEX, display="whiteBlack", preConten
 
 
 
+
+
 function setLine(content="", index=INDEX){
 	$("#commandLine"+index).html(content);
 }
@@ -182,6 +224,39 @@ function addLine(content="", index=INDEX){
 }
 
 
+
+
+
+
+function getUrlsData(){
+	var variables = {};
+
+	for (var variable of window.location.href.split("?")[1].split("&")){
+		variable = variable.split("=");
+		variables[variable[0]] = variable[1].replace("%20", " ");
+	}
+	return variables;
+}
+
+
+function reactMessagesUrl(){
+	try{
+		for(var message of getUrlsData()["toSend"].split(";")){
+			if(message != ""){
+				sendInput(message);
+			}
+		}
+
+	}catch{}
+}
+
+
+
+
 $(document).ready(function(){
 	setup();
+	goMenu("MAIN");
+	reactMessagesUrl();
+	$(document).ready();
+	onload = function(){}
 });
