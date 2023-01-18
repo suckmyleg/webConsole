@@ -1,15 +1,4 @@
-var COMMANDS = {
-	"execute":executeCommandLine,
-	"help":help,
-	"time":time,
-	"web": displayWeb,
-	"reset":reset,
-	"info":info,
-	"play":play,
-	"menu":menu,
-	"cls":cls,
-	"new":displayConsole
-}
+var COMMANDS = {}
 
 function cls(){
 	INDEX = 0;
@@ -138,7 +127,7 @@ function executeCommandLineFromConsole(data){
 
 addTrigger("userInputConsole", executeCommandLineFromConsole);
 
-addMenu("MAIN", execute,  "> ",{
+addMenu("MAIN", execute,  "JuanConsole/Main>",{
 	"execute":executeCommandLine,
 	"help":help,
 	"time":time,
@@ -150,5 +139,7 @@ addMenu("MAIN", execute,  "> ",{
 	"cls":cls,
 	"new":displayConsole,
 	"showNumbers":function(data){hideNumbers = false;},
-	"hideNumbers":function(data){hideNumbers = true;}
+	"hideNumbers":function(data){hideNumbers = true;},
+	"changeAnimationDelay":function(data){MESSAGEANIMATIONDELAY = data;},
+	"end":function(data){}
 });

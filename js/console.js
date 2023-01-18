@@ -4,6 +4,7 @@ var WAITTINGINPUT = [];
 var TRIGGERS = {};
 var INPUTINDEXMESSAGE = 0;
 var LASTLOGDATA = {};
+var MESSAGEANIMATIONDELAY = 5;
 
 var MENU = "";
 var MENUS = {}
@@ -85,6 +86,12 @@ function reset(){
 	setup();
 }
 
+function scrollBottom(){
+	$("#output").animate({
+	scrollTop: $(
+	'#output').get(0).scrollHeight
+	}, 0);
+}
 
 function sendInput(text){
 	var fun = WAITTINGINPUT.shift()
@@ -94,10 +101,6 @@ function sendInput(text){
 		trigger("userInputConsole", {"content":text, "contentDisplay":text});
 		fun(text);
 	}
-	$("#output").animate({
-	scrollTop: $(
-	'#output').get(0).scrollHeight
-	}, 1);
 
 	continueMenu();
 }
@@ -105,14 +108,14 @@ function sendInput(text){
 function setup(){
 	$("#console").html("<div id='output'></div><div id='input'></div>");
 	$("#output").html("<ul id='outputList'></ul>");
-	$("#input").html("<input title='input' length='50' type='text' id='inputInput'>");
+	$("#input").html("<input title='input' length='50' type='text' id='inputInput' class='inputHidden'>");
 
 	$("#inputInput").on("input", function(e) {
-
 		var self = this;
 
 		setTimeout(function(){
 			reLog($(self).val()+" ", INPUTINDEXMESSAGE, "blackWhite", false);
+			scrollBottom();
 		}, 1);
 	});
 
@@ -120,6 +123,7 @@ function setup(){
 		var keycode = (e.keyCode?e.keyCode:e.which);
 		if(keycode  == 13)
 		{
+			scrollBottom();
 			sendInput($(this).val());
 			$(this).val("");
 		}
@@ -131,6 +135,8 @@ function setup(){
 	$(document).on("click", function(){
 		$("input:text:visible:first").focus();
 	});
+
+	log("Juan Console [Version "+VERSION+"]\nAll rights reserved.\n ");
 }
 
 
@@ -153,7 +159,7 @@ function execute(text){}
 
 
 function input(fun, text=false){
-	if(text) {
+	if(text !== false) {
 		var data = trigger("preUserInput", {"content":"", "contentDisplay":"", "display":"whiteBlack", "preContent":text})
 		INPUTINDEXMESSAGE = log(data.contentDisplay, data.display, data.preContent);
 	}
@@ -166,7 +172,7 @@ function reLog(text="", index="", display="whiteBlack", preContent=""){
 	display = display===false?LASTLOGDATA.display:display;
 	preContent = preContent===false?LASTLOGDATA.preContent:preContent;
 
-	if(index == false) index = INDEX-1;
+	if(index === false) index = INDEX-1;
 	setLineMessage(text, index, display, preContent);
 }
 
@@ -175,7 +181,7 @@ function log(text, display="whiteBlack", preContent=""){
 
 	for(var message of text.split("\n"))
 	{
-		addLineMessage(message, INDEX, display, preContent);
+		addLineMessageAnimated(message, INDEX, display, preContent);
 	}
 	return INDEX-1;
 }
@@ -205,10 +211,26 @@ function setLineMessage(content="", index=INDEX, display="whiteBlack", preConten
 }
 
 function addLineMessage(content="", index=INDEX, display="whiteBlack", preContent=""){
-	addLine(setupLineMessage(index, content, display, preContent), index);
+	return addLine(setupLineMessage(index, content, display, preContent), index);
 }
 
+function addLineMessageAnimated(content="", index=INDEX, display="whiteBlack", preContent=""){
+	var temporalContent = "";
+	var index = addLine(setupLineMessage(index, temporalContent, display, preContent), index);
+	var i = 0;
+	addLineMessageAnimatedFor(content, index, display, preContent, 0);
+}
 
+function addLineMessageAnimatedFor(content, index, display, preContent, i){
+	var c = content.substring(0, i);
+	if(i <= content.length)
+	{
+		setLineMessage(c, index, display, preContent);
+		setTimeout(function(){
+			addLineMessageAnimatedFor(content, index, display, preContent, i+1);
+		}, MESSAGEANIMATIONDELAY);
+	}
+}
 
 
 
@@ -219,8 +241,9 @@ function setLine(content="", index=INDEX){
 }
 
 function addLine(content="", index=INDEX){
-	$("#outputList").html($("#outputList").html() + "<li id='commandLine"+index+"'>" + content + "</li>");
+	$("#outputList").append("<li id='commandLine"+index+"'>" + content + "</li>");
 	INDEX += 1;
+	return INDEX-1;
 }
 
 
@@ -242,11 +265,10 @@ function getUrlsData(){
 function reactMessagesUrl(){
 	try{
 		for(var message of getUrlsData()["toSend"].split(";")){
-			if(message != ""){
+			if(message !== ""){
 				sendInput(message);
 			}
 		}
-
 	}catch{}
 }
 

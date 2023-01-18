@@ -7,6 +7,7 @@ let formats = {
 	"$tab$":"&nbsp;".repeat(tabWhiteSpaces),
 	"$menu$":function(){return MENU;},
 	"$time$":function(){return Date.now();},
+	"$version$":function(){return VERSION;},
 	" ":"&nbsp;".repeat(whitecharachtersSpace)
 };
 
@@ -27,7 +28,6 @@ function prepareCommandLinecontentDisplay(data){
 	if(data.contentDisplay.includes("$hide$")){
 		data.contentDisplay = "";
 	}
-	if(data.contentDisplay == "" && data.precontentDisplay == "") data.indexTxt = "&nbsp;&nbsp;";
 
 	if(hideNumbers) data.indexTxt = "";
 
