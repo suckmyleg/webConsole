@@ -28,7 +28,7 @@ function displayWeb(href){
 }
 
 function play(href){
-	if(href.includes("mp3")){
+	if(href.includes(".mp3")){
 		playMusic(href);
 	}else{
 		playVideo(href);
@@ -66,7 +66,7 @@ function help(){
 }
 
 function version(){
-	log("Version: "+VERSION); 
+	log("Version: $version$"); 
 }
 
 function showTriggers(){
@@ -78,7 +78,7 @@ function showTriggers(){
 }
 
 function showActualMenu(){
-	log("Menu: "+MENU);
+	log("Menu: $menu$");
 }
 
 function showActualMenuCommands(){

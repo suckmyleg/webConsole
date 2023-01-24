@@ -1,4 +1,4 @@
-let VERSION = "0.0.1";
+let VERSION = "0.0.2";
 var INDEX = 0;
 var WAITTINGINPUT = [];
 var TRIGGERS = {};
@@ -87,10 +87,21 @@ function reset(){
 }
 
 function scrollBottom(){
+	console.log("Scrolling to bottom");
+
 	$("#output").animate({
 	scrollTop: $(
 	'#output').get(0).scrollHeight
-	}, 0);
+	}, 1);
+}
+
+function focusInput(){
+	$("input:text:visible:first").focus();
+}
+
+function focus(){
+	focusInput();
+	scrollBottom();
 }
 
 function sendInput(text){
@@ -115,7 +126,6 @@ function setup(){
 
 		setTimeout(function(){
 			reLog($(self).val()+" ", INPUTINDEXMESSAGE, "blackWhite", false);
-			scrollBottom();
 		}, 1);
 	});
 
@@ -123,14 +133,13 @@ function setup(){
 		var keycode = (e.keyCode?e.keyCode:e.which);
 		if(keycode  == 13)
 		{
-			scrollBottom();
 			sendInput($(this).val());
 			$(this).val("");
+			focus();
 		}
 	});
 
-
-	$("input:text:visible:first").focus();
+	focus();
 
 	$(document).on("click", function(){
 		$("input:text:visible:first").focus();
@@ -181,7 +190,7 @@ function log(text, display="whiteBlack", preContent=""){
 
 	for(var message of text.split("\n"))
 	{
-		addLineMessageAnimated(message, INDEX, display, preContent);
+		addLineMessage(message, INDEX, display, preContent);
 	}
 	return INDEX-1;
 }

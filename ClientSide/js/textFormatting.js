@@ -16,14 +16,23 @@ var operationsResults = {};
 function prepareCommandLinecontentDisplay(data){
 	var end = "";
 
+	var length = data.contentDisplay.length;
+
+	//NUMBER OF $CHAR$
+	var i = (data.contentDisplay.split('$char$').length-1);
+
+	var number = ((length-(6*i)-1));
+
+	number += ((i-1)*`${number+i+1}`.length);
+
+	while(data.contentDisplay.includes("$char$")) {
+		data.contentDisplay = data.contentDisplay.replace("$char$", number);
+	}
+	
 	for(var toRemove of Object.keys(formats))
 	{
 		while(data.contentDisplay.includes(toRemove)) data.contentDisplay = data.contentDisplay.replace(toRemove, formats[toRemove])
 	}
-	
-	var length = data.contentDisplay.length;
-
-	while(data.contentDisplay.includes("$char$")) data.contentDisplay = data.contentDisplay.replace("$char$", length)
 
 	if(data.contentDisplay.includes("$hide$")){
 		data.contentDisplay = "";
