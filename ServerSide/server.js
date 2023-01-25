@@ -6,11 +6,11 @@ var url = require('url');
 //TRIGGERS 
 var TRIGGERS = {};
 
-function runTrigger(name, data){
+function runTrigger(name, data={}){
   //Create data needed to run
-  var newData = null;
-  var funs = TRIGGERS[name];
-  if(name != "*")data.triggerData = {
+  let newData = null;
+  let funs = TRIGGERS[name];
+  if(name != "*") data.triggerData = {
     continue:true,
     name:name
   };  
@@ -31,7 +31,7 @@ function runTrigger(name, data){
 
   //Call every function from TRIGGERS[name]
   if(funs != null){
-    for(var fun of funs){
+    for(let fun of funs){
       if(!data.triggerData.continue) break;
       newData = fun(data);
       if(newData != null){
@@ -91,9 +91,9 @@ chat.setup(trigger, db.db);
 
 
 http.createServer(function (req, res) {
-  var q = url.parse(req.url, true);
+  let q = url.parse(req.url, true);
 
-  var data = {"req":req, "res":res, "q":q, "continue":true, "head":{
+  let data = {"req":req, "res":res, "q":q, "continue":true, "head":{
     "code":200,
     "data":{'Content-Type': 'application/json'}
   },
@@ -103,7 +103,7 @@ http.createServer(function (req, res) {
     "processes":[]
   }};
 
-  trigger.add("request", function(data){console.log(data);});
+  //trigger.add("request", function(data){console.log(data);});
 
   data = trigger.run("request", data);
   //data = trigger.run("beforesend", data);
@@ -112,4 +112,4 @@ http.createServer(function (req, res) {
 
   res.writeHead(data.head.code, data.head.data);
   res.end(JSON.stringify(data.return));
-}).listen(8080);
+}).listen(8080, '192.168.1.208');

@@ -165,12 +165,15 @@ function execute(text){}
 
 
 
-
+function changePreInput(preContent=""){
+	MENUS[MENU].inputText = preContent;
+}
 
 function input(fun, text=false){
 	if(text !== false) {
 		var data = trigger("preUserInput", {"content":"", "contentDisplay":"", "display":"whiteBlack", "preContent":text})
 		INPUTINDEXMESSAGE = log(data.contentDisplay, data.display, data.preContent);
+		LASTLOGDATA = data;
 	}
 	WAITTINGINPUT.push(fun);
 }
@@ -202,7 +205,6 @@ function setupCommandLineHtml(index, indexTxt, preContent, content, classes){
 
 function setupLineMessage(index, content, display, preContent){
 	var data = trigger("commandLineSetup", {"preContent":preContent, "content":content, "contentDisplay":content, "index":index, "indexTxt":""+index, "display":display});
-	LASTLOGDATA = data;
 	return setupCommandLineHtml(data.index, data.indexTxt, data.preContent, data.contentDisplay, data.display);
 }
 
@@ -265,7 +267,8 @@ function getUrlsData(){
 
 	for (var variable of window.location.href.split("?")[1].split("&")){
 		variable = variable.split("=");
-		variables[variable[0]] = variable[1].replace("%20", " ");
+		while(variable[1].includes("%20")) variable[1] = variable[1].replace("%20", " ");
+		variables[variable[0]] = variable[1];
 	}
 	return variables;
 }

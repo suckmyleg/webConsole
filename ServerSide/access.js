@@ -1,6 +1,6 @@
 exports.setup = function(trigger, db){
 	function userFull(user, passw, node){
-		return `${user}@${node}[${passw}]`;
+		return `|${user}@${node}[${passw}]|`;
 	}
 
 	var access = function(user, passw, node){	

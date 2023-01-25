@@ -1,13 +1,14 @@
 exports.setup = function(trigger, db){
 	trigger.add("allowed", function(data){
 		return trigger.run((data.q.query.command==null
-			||data.q.query.command=="")?"nocommand":"command", data);
+			||data.q.query.command=="")?"nocommand":"runcommand", data);
 	});
 
-	trigger.add("command", function(data) {
+	trigger.add("runcommand", function(data) {
 		data.command = {
 			executed:false
 		}
+		trigger.run("command_"+data.q.query.command, data);
 		return data;
 	});
 
@@ -17,7 +18,7 @@ exports.setup = function(trigger, db){
 		return data;
 	});
 
-	trigger.add("command", function(data){
+	trigger.add("runcommand", function(data){
 		if(!data.command.executed){
 			data.return.output = "Uknown command: "+data.q.query.command;
 			data.return.code = "200";
